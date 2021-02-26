@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "sirv-cli": "^1.0.0",
-    "svelte-loading-spinners": "^0.1.4"
+    "svelte-loading-spinners": "^0.1.4",
+    "three": "^0.126.0",
+    "typed.js": "^2.0.11"
   }
 }
