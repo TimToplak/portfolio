@@ -1,6 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import * as THREE from 'three';
+  import { OBJLoader } from './libs/OBJLoader.js';
+  import * as TWEEN from '@tweenjs/tween.js';
 
   onMount(() => {
     init();
@@ -34,6 +36,8 @@
   //     resize();
   //     animate();
   //   };
+  let innerHeight;
+
   let el;
   let camera, scene, renderer, stats, parameters;
   let mouseX = 0,
@@ -50,63 +54,110 @@
 
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x000000, 0.0008);
+    scene.background = new THREE.Color(0x120319);
 
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
+    const axesHelper = new THREE.AxesHelper(1000);
+    scene.add(axesHelper);
 
-    for (let i = 0; i < 1000; i++) {
-      const x = Math.random() * 2000 - 1000;
-      const y = Math.random() * 2000 - 1000;
-      const z = Math.random() * 2000 - 1000;
+    const loader = new OBJLoader();
 
-      vertices.push(x, y, z);
-    }
+    var objMaterial = new THREE.MeshBasicMaterial({ color: 'yellow', side: THREE.DoubleSide });
+    loader.load(
+      './assets/bulb.obj',
+      function (object) {
+        object.scale.set(10000, 10000, 10000);
+        scene.add(object);
+        console.log('test');
+        let bulbVertices = object.children[0].geometry.attributes.position.array;
 
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        const geometry = new THREE.BufferGeometry();
+        const vertices = [];
 
-    parameters = [
-      [[1.0, 0.2, 0.5], null, 20],
-      [[0.95, 0.1, 0.5], null, 15],
-      [[0.9, 0.05, 0.5], null, 10],
-      [[0.85, 0, 0.5], null, 8],
-      [[0.8, 0, 0.5], null, 5],
-    ];
+        for (let i = 0; i < bulbVertices.length; i += 3 * 4) {
+          // take every 4th point, prevents oversatturation of elements
+          const x = bulbVertices[i] * 5000;
+          const y = bulbVertices[i + 1] * 5000 - 150;
+          const z = bulbVertices[i + 2] * 5000;
 
-    for (let i = 0; i < parameters.length; i++) {
-      const color = parameters[i][0];
-      const sprite = parameters[i][1];
-      const size = parameters[i][2];
+          vertices.push(x, y, z);
+        }
 
-      materials[i] = new THREE.PointsMaterial({
-        size: size,
-        map: sprite,
-        blending: THREE.AdditiveBlending,
-        depthTest: false,
-        transparent: true,
-      });
-      materials[i].color.setHSL(color[0], color[1], color[2]);
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
-      const particles = new THREE.Points(geometry, materials[i]);
+        parameters = [
+          [[1.0, 0.2, 0.5], null, 20],
+          [[0.95, 0.1, 0.5], null, 15],
+          [[0.9, 0.05, 0.5], null, 10],
+          [[0.85, 0, 0.5], null, 8],
+          [[0.8, 0, 0.5], null, 5],
+        ];
 
-      particles.rotation.x = Math.random() * 6;
-      particles.rotation.y = Math.random() * 6;
-      particles.rotation.z = Math.random() * 6;
+        for (let i = 0; i < 1; i++) {
+          const color = parameters[i][0];
+          const sprite = parameters[i][1];
+          const size = parameters[i][2];
 
-      scene.add(particles);
-    }
+          materials[i] = new THREE.PointsMaterial({
+            size: size,
+            map: sprite,
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true,
+          });
+          materials[i].color.setHSL(color[0], color[1], color[2]);
 
-    //
+          const particles = new THREE.Points(geometry, materials[i]);
+          console.log(particles);
 
+          // particles.rotation.x = Math.random() * 6;
+          // particles.rotation.y = Math.random() * 6;
+          // particles.rotation.z = Math.random() * 6;
+
+          scene.add(particles);
+        }
+        console.log(object);
+        object.traverse(function (child) {
+          if (child instanceof THREE.Mesh) {
+            child.material = objMaterial;
+          }
+        });
+      },
+      function (xhr) {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+      },
+      function (error) {
+        console.log('An error happened');
+      }
+    );
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
     renderer = new THREE.WebGLRenderer({ antialias: true, canvas: el });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    document.body.style.touchAction = 'none';
+    renderer.setSize(vw, vh);
     document.body.addEventListener('pointermove', onPointerMove);
-
-    //
     animate();
     window.addEventListener('resize', onWindowResize);
+
+    setTimeout(() => {
+      for (let i = 0; i < scene.children.length; i++) {
+        const object = scene.children[i];
+
+        if (object instanceof THREE.Points) {
+          new TWEEN.Tween(object.position)
+            .to(
+              {
+                x: 100,
+                y: 100,
+                z: 100,
+              },
+              1000
+            )
+            .easing(TWEEN.Easing.Exponential.InOut)
+            .start();
+        }
+      }
+    }, 5000);
+    //
   }
 
   function onWindowResize() {
@@ -135,10 +186,11 @@
   }
 
   function render() {
+    TWEEN.update();
     const time = Date.now() * 0.00005;
 
     camera.position.x += (mouseX - camera.position.x) * 0.05;
-    camera.position.y += (-mouseY - camera.position.y) * 0.05;
+    camera.position.y += (mouseY - camera.position.y) * 0.05;
 
     camera.lookAt(scene.position);
 
@@ -146,7 +198,8 @@
       const object = scene.children[i];
 
       if (object instanceof THREE.Points) {
-        object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+        // object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+        object.position.z += 0.2;
       }
     }
 
@@ -161,6 +214,7 @@
   }
 </script>
 
+<svelte:window bind:innerHeight />
 <canvas bind:this={el} />
 
 <style>

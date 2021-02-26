@@ -4,7 +4,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start": "sirv public --host 0.0.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
@@ -17,6 +17,7 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
+    "@tweenjs/tween.js": "^18.6.4",
     "sirv-cli": "^1.0.0",
     "svelte-loading-spinners": "^0.1.4",
     "three": "^0.126.0",
