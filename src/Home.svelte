@@ -45,10 +45,11 @@
 
   let windowHalfX = window.innerWidth / 2;
   let windowHalfY = window.innerHeight / 2;
+  let positionID = 1;
 
   const materials = [];
 
-  function init() {
+  async function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
     camera.position.z = 1000;
 
@@ -59,76 +60,54 @@
     const axesHelper = new THREE.AxesHelper(1000);
     scene.add(axesHelper);
 
-    const loader = new OBJLoader();
+    let bulbVertices = await getOBJVertices('bulb.obj');
+    console.log(bulbVertices);
 
-    var objMaterial = new THREE.MeshBasicMaterial({ color: 'yellow', side: THREE.DoubleSide });
-    loader.load(
-      './assets/bulb.obj',
-      function (object) {
-        object.scale.set(10000, 10000, 10000);
-        scene.add(object);
-        console.log('test');
-        let bulbVertices = object.children[0].geometry.attributes.position.array;
+    const geometry = new THREE.BufferGeometry();
+    const vertices = [];
 
-        const geometry = new THREE.BufferGeometry();
-        const vertices = [];
+    for (let i = 0; i < bulbVertices.length; i += 3 * 4) {
+      // take every 4th point, prevents over-satturation of elements
+      const x = bulbVertices[i] * 5000;
+      const y = bulbVertices[i + 1] * 5000 - 250;
+      const z = bulbVertices[i + 2] * 5000;
 
-        for (let i = 0; i < bulbVertices.length; i += 3 * 4) {
-          // take every 4th point, prevents oversatturation of elements
-          const x = bulbVertices[i] * 5000;
-          const y = bulbVertices[i + 1] * 5000 - 150;
-          const z = bulbVertices[i + 2] * 5000;
+      vertices.push(x, y, z);
+    }
 
-          vertices.push(x, y, z);
-        }
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    parameters = [
+      [[1.0, 0.2, 0.5], null, 20],
+      [[0.95, 0.1, 0.5], null, 15],
+      [[0.9, 0.05, 0.5], null, 10],
+      [[0.85, 0, 0.5], null, 8],
+      [[0.8, 0, 0.5], null, 5],
+    ];
 
-        parameters = [
-          [[1.0, 0.2, 0.5], null, 20],
-          [[0.95, 0.1, 0.5], null, 15],
-          [[0.9, 0.05, 0.5], null, 10],
-          [[0.85, 0, 0.5], null, 8],
-          [[0.8, 0, 0.5], null, 5],
-        ];
+    for (let i = 0; i < 1; i++) {
+      const color = parameters[i][0];
+      const sprite = parameters[i][1];
+      const size = parameters[i][2];
 
-        for (let i = 0; i < 1; i++) {
-          const color = parameters[i][0];
-          const sprite = parameters[i][1];
-          const size = parameters[i][2];
+      materials[i] = new THREE.PointsMaterial({
+        size: size,
+        map: sprite,
+        blending: THREE.AdditiveBlending,
+        depthTest: false,
+        transparent: true,
+      });
+      materials[i].color.setHSL(color[0], color[1], color[2]);
 
-          materials[i] = new THREE.PointsMaterial({
-            size: size,
-            map: sprite,
-            blending: THREE.AdditiveBlending,
-            depthTest: false,
-            transparent: true,
-          });
-          materials[i].color.setHSL(color[0], color[1], color[2]);
+      const particles = new THREE.Points(geometry, materials[i]);
 
-          const particles = new THREE.Points(geometry, materials[i]);
-          console.log(particles);
+      // particles.rotation.x = Math.random() * 6;
+      // particles.rotation.y = Math.random() * 6;
+      // particles.rotation.z = Math.random() * 6;
 
-          // particles.rotation.x = Math.random() * 6;
-          // particles.rotation.y = Math.random() * 6;
-          // particles.rotation.z = Math.random() * 6;
+      scene.add(particles);
+    }
 
-          scene.add(particles);
-        }
-        console.log(object);
-        object.traverse(function (child) {
-          if (child instanceof THREE.Mesh) {
-            child.material = objMaterial;
-          }
-        });
-      },
-      function (xhr) {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-      },
-      function (error) {
-        console.log('An error happened');
-      }
-    );
     const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
     const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
     renderer = new THREE.WebGLRenderer({ antialias: true, canvas: el });
@@ -138,26 +117,84 @@
     animate();
     window.addEventListener('resize', onWindowResize);
 
-    setTimeout(() => {
-      for (let i = 0; i < scene.children.length; i++) {
-        const object = scene.children[i];
+    setInterval(changeParticlePosition, 3000);
+  }
 
-        if (object instanceof THREE.Points) {
-          new TWEEN.Tween(object.position)
-            .to(
-              {
-                x: 100,
-                y: 100,
-                z: 100,
-              },
-              1000
-            )
-            .easing(TWEEN.Easing.Exponential.InOut)
-            .start();
-        }
+  function changeParticlePosition() {
+    switch (positionID) {
+      case 0:
+        changeFormation1Bulb();
+        break;
+      case 1:
+        changeFormation2Random();
+        break;
+      default:
+        changeFormation1();
+        break;
+    }
+
+    positionID++;
+    if (positionID > 1) {
+      positionID = 0;
+    }
+  }
+
+  function changeFormation1Bulb() {
+    for (let i = 0; i < scene.children.length; i++) {
+      const object = scene.children[i];
+
+      if (object instanceof THREE.Points) {
+        console.log(object);
+        new TWEEN.Tween(object.position)
+          .to(
+            {
+              x: 100,
+              y: 100,
+              z: 100,
+            },
+            1500
+          )
+          .easing(TWEEN.Easing.Exponential.InOut)
+          .start();
       }
-    }, 5000);
-    //
+    }
+  }
+  function changeFormation2Random() {
+    for (let i = 0; i < scene.children.length; i++) {
+      const object = scene.children[i];
+
+      if (object instanceof THREE.Points) {
+        console.log(object);
+        var currentVertex = object.geometry.attributes.position.array[299];
+
+        new TWEEN.Tween(currentVertex)
+          .to(
+            Math.random() * 2000 - 1000,
+
+            1500
+          )
+          .easing(TWEEN.Easing.Exponential.InOut)
+          .start();
+      }
+    }
+  }
+
+  function getOBJVertices(objFileName) {
+    return new Promise(function (resolve, reject) {
+      const loader = new OBJLoader();
+      loader.load(
+        './assets/' + objFileName,
+        function (object) {
+          resolve(object.children[0].geometry.attributes.position.array);
+        },
+        function (xhr) {
+          console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+        },
+        function (error) {
+          reject(error);
+        }
+      );
+    });
   }
 
   function onWindowResize() {
@@ -189,8 +226,8 @@
     TWEEN.update();
     const time = Date.now() * 0.00005;
 
-    camera.position.x += (mouseX - camera.position.x) * 0.05;
-    camera.position.y += (mouseY - camera.position.y) * 0.05;
+    camera.position.x += (mouseX / 4 - camera.position.x) * 0.05;
+    camera.position.y += (mouseY / 4 - camera.position.y) * 0.05;
 
     camera.lookAt(scene.position);
 
