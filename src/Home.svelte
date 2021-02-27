@@ -3,7 +3,8 @@
   import * as THREE from 'three';
   import { OBJLoader } from './libs/OBJLoader.js';
   import * as TWEEN from '@tweenjs/tween.js';
-
+  import * as bulbVertices from './obj/bulbVertices.json';
+  import * as keyboardVertices from './obj/keyboardVertices.json';
   onMount(() => {
     init();
   });
@@ -46,7 +47,7 @@
   let windowHalfX = window.innerWidth / 2;
   let windowHalfY = window.innerHeight / 2;
   let positionID = 1;
-
+  let group;
   const materials = [];
 
   async function init() {
@@ -59,23 +60,6 @@
 
     const axesHelper = new THREE.AxesHelper(1000);
     scene.add(axesHelper);
-
-    let bulbVertices = await getOBJVertices('bulb.obj');
-    console.log(bulbVertices);
-
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-
-    for (let i = 0; i < bulbVertices.length; i += 3 * 4) {
-      // take every 4th point, prevents over-satturation of elements
-      const x = bulbVertices[i] * 5000;
-      const y = bulbVertices[i + 1] * 5000 - 250;
-      const z = bulbVertices[i + 2] * 5000;
-
-      vertices.push(x, y, z);
-    }
-
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
     parameters = [
       [[1.0, 0.2, 0.5], null, 20],
@@ -98,14 +82,23 @@
         transparent: true,
       });
       materials[i].color.setHSL(color[0], color[1], color[2]);
+    }
 
-      const particles = new THREE.Points(geometry, materials[i]);
+    let DOT_SIZE = 30;
+    var geometry = new THREE.BoxGeometry(DOT_SIZE * 0.8, DOT_SIZE * 0.8, DOT_SIZE * 0.8);
 
-      // particles.rotation.x = Math.random() * 6;
-      // particles.rotation.y = Math.random() * 6;
-      // particles.rotation.z = Math.random() * 6;
+    group = new THREE.Group();
+    scene.add(group);
 
-      scene.add(particles);
+    var meshArray = [];
+
+    for (let i = 0; i < keyboardVertices.default.length; i += 1) {
+      meshArray[i] = new THREE.Mesh(geometry, materials[0]);
+      meshArray[i].position.x = keyboardVertices.default[i].x * 500;
+      meshArray[i].position.y = keyboardVertices.default[i].y * 500;
+      meshArray[i].position.z = keyboardVertices.default[i].z * 500;
+
+      group.add(meshArray[i]);
     }
 
     const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
@@ -140,61 +133,39 @@
   }
 
   function changeFormation1Bulb() {
-    for (let i = 0; i < scene.children.length; i++) {
-      const object = scene.children[i];
+    console.log(bulbVertices.default);
+    for (let i = 0; i < bulbVertices.default.length; i++) {
+      const object = group.children[i];
 
-      if (object instanceof THREE.Points) {
-        console.log(object);
-        new TWEEN.Tween(object.position)
-          .to(
-            {
-              x: 100,
-              y: 100,
-              z: 100,
-            },
-            1500
-          )
-          .easing(TWEEN.Easing.Exponential.InOut)
-          .start();
-      }
+      new TWEEN.Tween(object.position)
+        .to(
+          {
+            x: bulbVertices.default[i].x * 5000,
+            y: bulbVertices.default[i].y * 5000 - 200,
+            z: bulbVertices.default[i].z * 5000,
+          },
+          1500
+        )
+        .easing(TWEEN.Easing.Exponential.InOut)
+        .start();
     }
   }
   function changeFormation2Random() {
-    for (let i = 0; i < scene.children.length; i++) {
-      const object = scene.children[i];
+    for (let i = 0; i < group.children.length; i++) {
+      const object = group.children[i];
 
-      if (object instanceof THREE.Points) {
-        console.log(object);
-        var currentVertex = object.geometry.attributes.position.array[299];
-
-        new TWEEN.Tween(currentVertex)
-          .to(
-            Math.random() * 2000 - 1000,
-
-            1500
-          )
-          .easing(TWEEN.Easing.Exponential.InOut)
-          .start();
-      }
+      new TWEEN.Tween(object.position)
+        .to(
+          {
+            x: Math.random() * 2000 - 1000,
+            y: Math.random() * 2000 - 1000,
+            z: Math.random() * 2000 - 1000,
+          },
+          1500
+        )
+        .easing(TWEEN.Easing.Exponential.InOut)
+        .start();
     }
-  }
-
-  function getOBJVertices(objFileName) {
-    return new Promise(function (resolve, reject) {
-      const loader = new OBJLoader();
-      loader.load(
-        './assets/' + objFileName,
-        function (object) {
-          resolve(object.children[0].geometry.attributes.position.array);
-        },
-        function (xhr) {
-          console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-        },
-        function (error) {
-          reject(error);
-        }
-      );
-    });
   }
 
   function onWindowResize() {
