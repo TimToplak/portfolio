@@ -2,16 +2,25 @@
   import { onMount } from 'svelte';
   import * as THREE from 'three';
   import * as TWEEN from '@tweenjs/tween.js';
+  import Typed from 'typed.js';
+
   import * as bulbVertices from './obj/bulbVertices.json';
   import * as textVertices from './obj/textVertices.json';
   onMount(() => {
     init();
+    var options = {
+      strings: ['Software developer', 'Converting ideas to codee'],
+      typeSpeed: 80,
+      loop: true,
+    };
+
+    var typed = new Typed('.typedSpan', options);
   });
 
   let innerHeight;
 
   let el;
-  let camera, scene, renderer, stats, parameters;
+  let camera, scene, renderer;
   let mouseX = 0,
     mouseY = 0;
 
@@ -19,6 +28,7 @@
   let windowHalfY = window.innerHeight / 2;
   let positionID = 0;
   let group;
+  let meshLight;
 
   async function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
@@ -28,19 +38,7 @@
     scene.fog = new THREE.FogExp2(0x000000, 0.0008);
     scene.background = new THREE.Color(0x120319);
 
-    const axesHelper = new THREE.AxesHelper(1000);
-    scene.add(axesHelper);
-
-    parameters = [
-      [[1.0, 0.2, 0.5], null, 20],
-      [[0.95, 0.1, 0.5], null, 15],
-      [[0.9, 0.05, 0.5], null, 10],
-      [[0.85, 0, 0.5], null, 8],
-      [[0.8, 0, 0.5], null, 5],
-    ];
-
-    let DOT_SIZE = 30;
-    var geometry = new THREE.BoxGeometry(DOT_SIZE * 0.8, DOT_SIZE * 0.8, DOT_SIZE * 0.8);
+    var geometry = new THREE.BoxGeometry(24, 24, 24);
 
     group = new THREE.Group();
     scene.add(group);
@@ -62,6 +60,23 @@
 
       group.add(mesh);
     }
+
+    var geometryLight = new THREE.BoxGeometry(40, 40, 40);
+    let materialLight = new THREE.PointsMaterial({
+      size: 20,
+      map: null,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
+      transparent: true,
+      opacity: 0,
+    });
+    materialLight.color.setRGB(1, 1, 0);
+
+    meshLight = new THREE.Mesh(geometryLight, materialLight);
+    meshLight.position.x = 0;
+    meshLight.position.y = 210;
+    meshLight.position.z = 0;
+    scene.add(meshLight);
 
     const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
     const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
@@ -128,6 +143,37 @@
         .easing(TWEEN.Easing.Quartic.In)
         .start();
     }
+
+    new TWEEN.Tween(meshLight.rotation)
+      .to(
+        {
+          x: 400,
+          y: 400,
+          z: 400,
+        },
+        1000000
+      )
+      .start();
+
+    new TWEEN.Tween(meshLight.material)
+      .to(
+        {
+          opacity: 1,
+        },
+        2000
+      )
+      .chain(
+        new TWEEN.Tween(meshLight.material)
+          .to(
+            {
+              opacity: 0,
+            },
+            2000
+          )
+          .delay(10000)
+      )
+      .delay(1000)
+      .start();
   }
 
   function changeFomration2Code() {
@@ -232,10 +278,25 @@
 </script>
 
 <svelte:window bind:innerHeight />
-<canvas bind:this={el} />
+<div>
+  <canvas bind:this={el} />
+  <div class="typedWrapper">
+    <span>Tim Toplak</span>
+    <br />
+    <span class="typedSpan" />
+  </div>
+</div>
 
 <style>
   canvas {
     display: block; /* fix necessary to remove space at bottom of canvas */
+  }
+
+  .typedWrapper {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    font-size: 4em;
   }
 </style>
