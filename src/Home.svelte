@@ -3,13 +3,14 @@
   import * as THREE from 'three';
   import * as TWEEN from '@tweenjs/tween.js';
   import Typed from 'typed.js';
+  import { scrollto } from 'svelte-scrollto';
 
   import * as bulbVertices from './obj/bulbVertices.json';
   import * as textVertices from './obj/textVertices.json';
   onMount(() => {
     init();
     var options = {
-      strings: ['Software developer', 'Converting ideas to codee'],
+      strings: ['Software developer;', 'Converting ideas to code;'],
       typeSpeed: 80,
       loop: true,
     };
@@ -36,7 +37,7 @@
 
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x000000, 0.0008);
-    scene.background = new THREE.Color(0x120319);
+    scene.background = new THREE.Color(0x070727);
 
     var geometry = new THREE.BoxGeometry(24, 24, 24);
 
@@ -279,11 +280,16 @@
 
 <svelte:window bind:innerHeight />
 <div>
+  <div class="topbar">
+    <div class="links" use:scrollto={'#projects'}>projects</div>
+    <div class="links" use:scrollto={'#about'}>about</div>
+    <div class="links">contact</div>
+  </div>
   <canvas bind:this={el} />
   <div class="typedWrapper">
-    <span>Tim Toplak</span>
+    <span class="text">Tim Toplak:</span>
     <br />
-    <span class="typedSpan" />
+    <span class="typedSpan text" />
   </div>
 </div>
 
@@ -296,7 +302,27 @@
     position: absolute;
     bottom: 20px;
     left: 20px;
-    color: white;
-    font-size: 4em;
+    font-size: 3.5em;
+  }
+
+  .topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .links {
+    margin-left: 30px;
+    padding-left: 3px;
+    padding-right: 3px;
+    cursor: pointer;
+  }
+  .links:hover {
+    background-color: #3f456388;
   }
 </style>
