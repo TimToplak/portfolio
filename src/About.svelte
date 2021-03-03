@@ -1,13 +1,13 @@
 <script>
 </script>
 
-<div id="about" class="row">
+<div id="about" class="row mt-3 mb-3">
   <div class="col-sm d-flex justify-content-center portrait">
     <img alt src="./assets/me.jfif" />
   </div>
   <div class="col-sm  d-flex justify-content-center align-items-center">
     <div class="text-center">
-      <br /> I like new tech, home automation, 3D printing & modeling, <br />Hackathons, digital art, Reddit, Seinfeld,
+      <br /> I like new tech, home automation, 3D printing & modeling, Hackathons, digital art, Reddit, Seinfeld,
       gaming,...
       <br />
 

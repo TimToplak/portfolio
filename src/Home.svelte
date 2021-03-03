@@ -283,7 +283,7 @@
   <div class="topbar">
     <div class="links" use:scrollto={'#projects'}>projects</div>
     <div class="links" use:scrollto={'#about'}>about</div>
-    <div class="links">contact</div>
+    <div class="links" use:scrollto={'#contact'}>contact</div>
   </div>
   <canvas bind:this={el} />
   <div class="typedWrapper">
@@ -303,6 +303,12 @@
     bottom: 20px;
     left: 20px;
     font-size: 3.5em;
+  }
+
+  @media only screen and (max-width: 840px) {
+    .typedWrapper {
+      font-size: 2.1em;
+    }
   }
 
   .topbar {
