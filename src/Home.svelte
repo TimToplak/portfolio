@@ -30,6 +30,8 @@
   let positionID = 0;
   let group;
   let meshLight;
+  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
 
   async function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
@@ -79,13 +81,12 @@
     meshLight.position.z = 0;
     scene.add(meshLight);
 
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
     renderer = new THREE.WebGLRenderer({ antialias: true, canvas: el });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(vw, vh);
     animate();
     document.body.addEventListener('pointermove', onPointerMove);
+
     window.addEventListener('resize', onWindowResize);
 
     setTimeout(changeParticlePosition, 2000);
@@ -117,7 +118,6 @@
   }
 
   function changeFormation1Bulb() {
-    console.log(bulbVertices.default);
     for (let i = 0; i < bulbVertices.default.length; i++) {
       const object = group.children[i];
 
@@ -242,13 +242,15 @@
   }
 
   function onWindowResize() {
-    windowHalfX = window.innerWidth / 2;
-    windowHalfY = window.innerHeight / 2;
+    if (window.innerWidth != vw) {
+      windowHalfX = window.innerWidth / 2;
+      windowHalfY = window.innerHeight / 2;
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
   }
 
   function onPointerMove(event) {
