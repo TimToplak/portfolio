@@ -85,9 +85,10 @@
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(vw, vh);
     animate();
-    document.body.addEventListener('pointermove', onPointerMove);
 
     window.addEventListener('resize', onWindowResize);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('deviceorientation', handleOrientation, true);
 
     setTimeout(changeParticlePosition, 2000);
   }
@@ -253,11 +254,19 @@
     }
   }
 
+  function handleOrientation(event) {
+    var alpha = event.alpha;
+    var beta = event.beta;
+
+    mouseX = alpha * 4;
+    mouseY = beta * 4;
+  }
+
   function onPointerMove(event) {
     if (event.isPrimary === false) return;
 
-    mouseX = event.clientX - windowHalfX;
-    mouseY = event.clientY - windowHalfY;
+    mouseX = (event.clientX - windowHalfX) / 4;
+    mouseY = (event.clientY - windowHalfY) / 4;
   }
 
   //
@@ -271,8 +280,8 @@
   function render() {
     TWEEN.update();
 
-    camera.position.x += (mouseX / 4 - camera.position.x) * 0.05;
-    camera.position.y += (mouseY / 4 - camera.position.y) * 0.05;
+    camera.position.x += (mouseX - camera.position.x) * 0.05;
+    camera.position.y += (mouseY - camera.position.y) * 0.05;
 
     camera.lookAt(scene.position);
 
