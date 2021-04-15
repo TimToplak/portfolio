@@ -12,6 +12,7 @@
     var options = {
       strings: ['Software developer;', 'Converting ideas to code;'],
       typeSpeed: 80,
+      backDelay: 1500,
       loop: true,
     };
 
@@ -298,9 +299,11 @@
   </div>
   <canvas bind:this={el} />
   <div class="typedWrapper">
-    <span class="text">Tim Toplak:</span>
+    <img class="avatar" alt src="./assets/avatar_blue_medium.png" />
     <br />
-    <span class="typedSpan text" />
+    <span class="name-text">Tim Toplak:</span>
+    <br />
+    <span class="typedSpan text-typed" />
   </div>
 </div>
 
@@ -308,17 +311,30 @@
   canvas {
     display: block; /* fix necessary to remove space at bottom of canvas */
   }
-
   .typedWrapper {
     position: absolute;
     bottom: 20px;
     left: 20px;
     font-size: 3.5em;
+    display: inline-block;
+  }
+  .name-text {
+    background-color: #3f456388;
+    padding-left: 10px;
+    padding-right: 1px;
   }
 
+  .avatar {
+    width: 280px;
+    border-radius: 50%;
+  }
   @media only screen and (max-width: 840px) {
     .typedWrapper {
-      font-size: 2.1em;
+      font-size: 1.4em;
+    }
+
+    .avatar {
+      width: 124px;
     }
   }
 

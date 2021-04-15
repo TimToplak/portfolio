@@ -69,8 +69,11 @@ button:focus {
   border-color: #666;
 }
 
-.text {
+.text-typed {
   background-color: #3f456388;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-right: -23px;
 }
 
 a:visited {
