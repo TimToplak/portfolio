@@ -30,6 +30,6 @@
   }
 
   .white {
-    background-color: rgb(252, 244, 231);
+    background-color: rgb(255, 255, 255);
   }
 </style>

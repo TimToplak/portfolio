@@ -5,8 +5,8 @@
   import Contact from './Contact.svelte';
 </script>
 
-<Home />
-<Work />
+<!-- <Home />
+<Work /> -->
 <About />
 <Contact />
 
