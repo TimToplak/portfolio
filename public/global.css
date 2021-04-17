@@ -76,6 +76,12 @@ button:focus {
   margin-right: -23px;
 }
 
+@media only screen and (max-width: 840px) {
+  .text-typed {
+    margin-right: -13px;
+  }
+}
+
 a:visited {
   color: #007bf4;
 }
