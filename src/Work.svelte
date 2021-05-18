@@ -7,7 +7,7 @@
     projectName={'avtosijaj.si'}
     projectUrl={'https://avtosijaj.si'}
     projectDescription={'Portfolio website for car polishing company'}
-    projectTech={'Veu.js'}
+    projectTech={'Vue.js'}
     projectPicUrl={'./assets/avtosijaj.jpg'}
     reverse={false}
   />
