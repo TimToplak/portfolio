@@ -29,6 +29,15 @@
     projectPicUrl={'./assets/ttab.jpg'}
     reverse={false}
   />
+
+  <Project
+    projectName={'github.com/timtoplak/portfolio'}
+    projectUrl={'https://github.com/timtoplak/portfolio'}
+    projectDescription={'Portfolio'}
+    projectTech={'Svelte, THREE.js library'}
+    projectPicUrl={'./assets/portfolio.jpg'}
+    reverse={true}
+  />
 </div>
 
 <style>

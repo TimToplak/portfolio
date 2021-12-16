@@ -33,6 +33,7 @@
   let meshLight;
   const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
   const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+  const isOnMobile = window.screen.width < 1000 ? true : false;
 
   async function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
@@ -187,8 +188,8 @@
       new TWEEN.Tween(object.position)
         .to(
           {
-            x: textVertices.default[i].x * 50 - 1200,
-            y: textVertices.default[i].y * 60 + 600,
+            x: textVertices.default[i].x * (isOnMobile ? 11 : 50) - (isOnMobile ? 300 : 1200),
+            y: textVertices.default[i].y * (isOnMobile ? 40 : 50) + (isOnMobile ? 550 : 600),
             z: textVertices.default[i].z * 50,
           },
           1500
@@ -209,6 +210,21 @@
         .easing(TWEEN.Easing.Quartic.In)
         .delay(delay)
         .start();
+
+      if (isOnMobile) {
+        new TWEEN.Tween(object.scale)
+          .to(
+            {
+              x: 0.3,
+              y: 0.3,
+              z: 0.3,
+            },
+            2000
+          )
+          .easing(TWEEN.Easing.Quartic.In)
+          .delay(delay)
+          .start();
+      }
       delay += 50;
     }
   }
@@ -216,6 +232,20 @@
   function changeFormation3Random() {
     for (let i = 0; i < group.children.length; i++) {
       const object = group.children[i];
+
+      if (isOnMobile) {
+        new TWEEN.Tween(object.scale)
+          .to(
+            {
+              x: 1,
+              y: 1,
+              z: 1,
+            },
+            2000
+          )
+          .easing(TWEEN.Easing.Quartic.InOut)
+          .start();
+      }
 
       new TWEEN.Tween(object.position)
         .to(
