@@ -27,7 +27,7 @@
     "svelte-intersection-observer": "^0.7.0",
     "svelte-loading-spinners": "^0.1.4",
     "svelte-scrollto": "^0.2.0",
-    "three": "^0.126.0",
+    "three": "^0.137.1",
     "typed.js": "^2.0.11"
   }
 }
